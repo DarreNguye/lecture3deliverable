@@ -60,8 +60,16 @@ def get_embeddings(texts: list[str], model: str = DEFAULT_EMBEDDING_MODEL) -> li
     Hint: client.embeddings.create(...) returns a response whose `.data`
     attribute is a list of objects, each with an `.embedding` field.
     """
-    # TODO: Call the API and return the embeddings.
-    raise NotImplementedError
+    
+    # Ensure there is text
+    if not texts:
+        return []
+    
+    # Fetch from API
+    response = client.embeddings.create(input = texts, model = model)
+    embeddings = [datum.embedding for datum in response.data]
+
+    return embeddings
 
 
 # ---------------------------------------------------------------------------
@@ -82,8 +90,10 @@ def mean_pool(embeddings: list[list[float]]) -> np.ndarray:
     When you have multiple embeddings for a single "document" (e.g. chunked
     text), mean-pooling collapses them into one representation.
     """
-    # TODO: Compute and return the mean-pooled vector.
-    raise NotImplementedError
+
+    # Convert to NumPy array
+    matrix = np.array(embeddings)
+    return matrix.mean(axis = 0)
 
 
 # ---------------------------------------------------------------------------
@@ -106,8 +116,18 @@ def cosine_similarity(vec_a: np.ndarray, vec_b: np.ndarray) -> float:
     Implement the formula above using only basic numpy operations
     (dot product, norm, etc.).
     """
-    # TODO: Implement cosine similarity from scratch.
-    raise NotImplementedError
+    
+    # Compute magnitudes
+    mag_a = np.linalg.norm(vec_a)
+    mag_b = np.linalg.norm(vec_b)
+
+    # Compute dot
+    dot = np.dot(vec_a, vec_b)
+
+    # Apply formuka
+    ans = dot / (mag_a * mag_b)
+
+    return ans
 
 
 # ---------------------------------------------------------------------------
@@ -135,8 +155,17 @@ def top_k_similar(
 
     Hint: Use your cosine_similarity function from Part 3.
     """
-    # TODO: Compute similarities and return the top-k results.
-    raise NotImplementedError
+
+    # Compute cosine similarity for each corpus vector
+    similarities = [cosine_similarity(query_vec, corpus_vec) for corpus_vec in corpus_vecs]
+
+    # Pair similarities and corpus text
+    pairs = list(zip(corpus_texts, similarities))
+
+    # Sort and take the top K
+    ans = sorted(pairs, key = lambda x: x[1], reverse = True)[:k]
+
+    return ans
 
 
 # ---------------------------------------------------------------------------
